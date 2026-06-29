@@ -145,7 +145,7 @@ export default function FlightMap() {
       if (!rightDragRef.current) return;
       const { startY, startPitch } = rightDragRef.current;
       const dy = startY - e.clientY; // drag up = more pitch
-      const newPitch = Math.max(0, Math.min(60, startPitch + dy * 0.4));
+      const newPitch = Math.max(0, Math.min(85, startPitch + dy * 0.4));
       setViewState((vs) => ({ ...vs, pitch: newPitch }));
       setIs3D(newPitch > 5);
     };
@@ -214,9 +214,9 @@ export default function FlightMap() {
       <DeckGL
         viewState={viewState}
         onViewStateChange={({ viewState: vs }) => {
-          setViewState(vs as MapViewState);
-          // Keep is3D in sync when pitch changes via built-in controls
-          const pitch = (vs as MapViewState).pitch ?? 0;
+          const next = vs as MapViewState;
+          const pitch = Math.max(0, Math.min(85, next.pitch ?? 0));
+          setViewState({ ...next, pitch });
           setIs3D(pitch > 5);
         }}
         controller={true}
@@ -254,7 +254,7 @@ export default function FlightMap() {
             className="text-white font-bold tracking-[0.35em] text-lg"
             style={{ textShadow: "0 0 20px rgba(64,196,255,0.5)" }}
           >
-            CONTRAIL
+            CONTRAILS
           </span>
           {flights.length > 0 && !loading && (
             <span className="text-gray-500 text-xs">
@@ -360,58 +360,73 @@ export default function FlightMap() {
 
       {/* Controls — bottom right */}
       <div className="absolute right-4 bottom-6 z-10 flex flex-col items-end gap-2">
-        {is3D && (
-          <div className="bg-black/75 backdrop-blur-md rounded-2xl border border-gray-800/80 p-3.5 w-52">
-            <div className="flex justify-between items-center mb-2.5">
-              <span className="text-gray-400 text-xs">Altitude scale</span>
-              <span className="text-blue-300 text-xs font-mono tabular-nums">
-                {verticalScale}×
-              </span>
-            </div>
-            <input
-              type="range"
-              min={5}
-              max={120}
-              value={verticalScale}
-              onChange={(e) => setVerticalScale(Number(e.target.value))}
-              className="w-full h-1.5 rounded-full appearance-none cursor-pointer accent-blue-400"
-            />
-            <div className="flex justify-between mt-1">
-              <span className="text-gray-700 text-[10px]">5×</span>
-              <span className="text-gray-700 text-[10px]">120×</span>
-            </div>
-          </div>
-        )}
+        <div className="flex flex-col items-end gap-2">
+          <div className="flex items-center gap-2">
+            {/* Compass — rotates with bearing, click resets to north */}
+            <button
+              onClick={() => setViewState((vs) => ({ ...vs, bearing: 0 }))}
+              title="Reset to north"
+              className="w-10 h-10 flex items-center justify-center bg-black/75 backdrop-blur-md rounded-full border border-gray-800/80 hover:border-gray-600 transition-colors"
+            >
+              <svg viewBox="0 0 32 32" width="22" height="22" overflow="visible">
+                <g
+                  style={{
+                    transform: `rotate(${-(viewState.bearing ?? 0)}deg)`,
+                    transformOrigin: "16px 16px",
+                  }}
+                >
+                  <polygon points="16,3 19.5,16 16,13.5 12.5,16" fill="#ef4444" />
+                  <polygon points="16,29 19.5,16 16,18.5 12.5,16" fill="#374151" />
+                </g>
+              </svg>
+            </button>
 
-        <div className="flex flex-col items-end gap-1">
-          <button
-            onClick={toggle3D}
-            className={`px-5 py-2.5 rounded-xl border text-sm font-semibold tracking-wide transition-all backdrop-blur-sm ${
-              is3D
-                ? "bg-blue-500/15 border-blue-500/40 text-blue-300 hover:bg-blue-500/25"
-                : "bg-black/75 border-gray-700 text-gray-400 hover:text-white hover:border-gray-500"
-            }`}
-          >
-            {is3D ? "3D" : "2D"}
-          </button>
-          <span className="text-gray-700 text-[10px] pr-0.5">
-            right-drag to tilt
-          </span>
+            <button
+              onClick={toggle3D}
+              className={`px-5 py-2.5 rounded-xl border text-sm font-semibold tracking-wide transition-all backdrop-blur-sm ${
+                is3D
+                  ? "bg-blue-500/15 border-blue-500/40 text-blue-300 hover:bg-blue-500/25"
+                  : "bg-black/75 border-gray-700 text-gray-400 hover:text-white hover:border-gray-500"
+              }`}
+            >
+              {is3D ? "3D" : "2D"}
+            </button>
+          </div>
+
+          {is3D && (
+            <div className="bg-black/75 backdrop-blur-md rounded-2xl border border-gray-800/80 p-3.5 w-52">
+              <div className="flex justify-between items-center mb-2.5">
+                <span className="text-gray-400 text-xs">Altitude scale</span>
+                <span className="text-blue-300 text-xs font-mono tabular-nums">
+                  {verticalScale}×
+                </span>
+              </div>
+              <input
+                type="range"
+                min={1}
+                max={120}
+                value={verticalScale}
+                onChange={(e) => setVerticalScale(Number(e.target.value))}
+                className="w-full h-1.5 rounded-full appearance-none cursor-pointer accent-blue-400"
+              />
+              <div className="flex justify-between mt-1">
+                <span className="text-gray-700 text-[10px]">1×</span>
+                <span className="text-gray-700 text-[10px]">120×</span>
+              </div>
+            </div>
+          )}
         </div>
       </div>
 
       {/* Loading */}
       {loading && (
         <div className="absolute inset-0 bg-black flex items-center justify-center z-20">
-          <div className="text-center">
-            <p
-              className="text-white text-2xl font-bold tracking-[0.35em] mb-3 animate-pulse"
-              style={{ textShadow: "0 0 30px rgba(64,196,255,0.6)" }}
-            >
-              CONTRAIL
-            </p>
-            <p className="text-gray-600 text-sm">Loading your flights…</p>
-          </div>
+          <p
+            className="text-white text-2xl font-bold tracking-[0.35em] animate-pulse"
+            style={{ textShadow: "0 0 30px rgba(64,196,255,0.6)" }}
+          >
+            CONTRAILS
+          </p>
         </div>
       )}
 
