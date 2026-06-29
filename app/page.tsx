@@ -10,7 +10,7 @@ const FlightMap = dynamic(() => import("@/components/FlightMap"), {
         className="text-white text-2xl font-bold tracking-[0.35em] animate-pulse"
         style={{ textShadow: "0 0 30px rgba(64,196,255,0.6)" }}
       >
-        CONTRAIL
+        CONTRAILS
       </p>
     </div>
   ),

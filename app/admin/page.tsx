@@ -118,7 +118,7 @@ export default function AdminPage() {
           </a>
           <span className="text-gray-800">|</span>
           <h1 className="text-sm font-bold tracking-[0.2em] text-gray-300">
-            CONTRAIL / ADMIN
+            CONTRAILS / ADMIN
           </h1>
         </div>
         <button

@@ -35,7 +35,7 @@ function LoginForm() {
       <div className="w-full max-w-sm px-4">
         <div className="text-center mb-10">
           <h1 className="text-white text-3xl font-bold tracking-[0.3em] mb-2">
-            CONTRAIL
+            CONTRAILS
           </h1>
           <p className="text-gray-600 text-sm">Your personal flight map</p>
         </div>
