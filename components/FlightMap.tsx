@@ -29,6 +29,39 @@ interface FlightData {
   callsign: string;
   uploadedAt: string;
   coordinates: [number, number, number][];
+  timestamps?: number[];
+}
+
+function haversineKm(lon1: number, lat1: number, lon2: number, lat2: number): number {
+  const R = 6371;
+  const dLat = ((lat2 - lat1) * Math.PI) / 180;
+  const dLon = ((lon2 - lon1) * Math.PI) / 180;
+  const a =
+    Math.sin(dLat / 2) ** 2 +
+    Math.cos((lat1 * Math.PI) / 180) *
+      Math.cos((lat2 * Math.PI) / 180) *
+      Math.sin(dLon / 2) ** 2;
+  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+}
+
+function totalDistanceKm(coords: [number, number, number][]): number {
+  let total = 0;
+  for (let i = 1; i < coords.length; i++) {
+    total += haversineKm(coords[i - 1][0], coords[i - 1][1], coords[i][0], coords[i][1]);
+  }
+  return total;
+}
+
+function formatDuration(seconds: number): string {
+  const h = Math.floor(seconds / 3600);
+  const m = Math.floor((seconds % 3600) / 60);
+  if (h === 0) return `${m}m`;
+  return `${h}h ${m}m`;
+}
+
+function formatDistance(km: number): string {
+  if (km < 100) return `${Math.round(km)} km`;
+  return `${Math.round(km).toLocaleString()} km`;
 }
 
 const INITIAL_VIEW: MapViewState = {
@@ -286,26 +319,44 @@ export default function FlightMap() {
       )}
 
       {/* Selected flight info */}
-      {selected && (
-        <div className="absolute left-4 bottom-24 z-10 bg-black/75 backdrop-blur-md rounded-2xl border border-gray-800/80 p-4 w-56">
-          <p className="text-white text-sm font-semibold mb-1 truncate">
-            {selected.name}
-          </p>
-          <p className="text-gray-500 text-xs">
-            {selected.callsign} ·{" "}
-            {selected.coordinates.length.toLocaleString()} pts
-          </p>
-          {is3D && (
-            <p className="text-gray-500 text-xs mt-1">
-              Max alt:{" "}
-              {Math.round(
-                Math.max(...selected.coordinates.map(([, , a]) => a)) * 3.28084
-              ).toLocaleString()}{" "}
-              ft
+      {selected && (() => {
+        const distKm = totalDistanceKm(selected.coordinates);
+        const ts = selected.timestamps;
+        const durationSec =
+          ts && ts.length >= 2 ? ts[ts.length - 1] - ts[0] : null;
+        const maxAltFt = Math.round(
+          Math.max(...selected.coordinates.map(([, , a]) => a)) * 3.28084
+        );
+        return (
+          <div className="absolute left-4 bottom-24 z-10 bg-black/75 backdrop-blur-md rounded-2xl border border-gray-800/80 p-4 w-56">
+            <p className="text-white text-sm font-semibold mb-3 truncate">
+              {selected.name}
             </p>
-          )}
-        </div>
-      )}
+            <div className="space-y-1.5">
+              <div className="flex justify-between items-baseline">
+                <span className="text-gray-600 text-[10px] uppercase tracking-wider">Distance</span>
+                <span className="text-gray-300 text-xs font-mono">{formatDistance(distKm)}</span>
+              </div>
+              {durationSec !== null && (
+                <div className="flex justify-between items-baseline">
+                  <span className="text-gray-600 text-[10px] uppercase tracking-wider">Duration</span>
+                  <span className="text-gray-300 text-xs font-mono">{formatDuration(durationSec)}</span>
+                </div>
+              )}
+              {is3D && maxAltFt > 0 && (
+                <div className="flex justify-between items-baseline">
+                  <span className="text-gray-600 text-[10px] uppercase tracking-wider">Max Alt</span>
+                  <span className="text-gray-300 text-xs font-mono">{maxAltFt.toLocaleString()} ft</span>
+                </div>
+              )}
+              <div className="flex justify-between items-baseline pt-1 border-t border-gray-800">
+                <span className="text-gray-600 text-[10px] uppercase tracking-wider">Callsign</span>
+                <span className="text-gray-300 text-xs font-mono">{selected.callsign}</span>
+              </div>
+            </div>
+          </div>
+        );
+      })()}
 
       {/* Controls — bottom right */}
       <div className="absolute right-4 bottom-6 z-10 flex flex-col items-end gap-2">

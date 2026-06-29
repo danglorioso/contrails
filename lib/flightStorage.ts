@@ -10,6 +10,7 @@ export interface FlightData {
   callsign: string;
   uploadedAt: string;
   coordinates: [number, number, number][]; // [lon, lat, altMeters]
+  timestamps: number[]; // unix seconds, parallel to coordinates
 }
 
 async function ensureDataDir() {

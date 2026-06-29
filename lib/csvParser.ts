@@ -13,6 +13,7 @@ interface RawRow {
 export interface ParsedFlight {
   callsign: string;
   coordinates: [number, number, number][]; // [lon, lat, altMeters]
+  timestamps: number[]; // unix seconds, parallel to coordinates
 }
 
 const FEET_TO_METERS = 0.3048;
@@ -42,6 +43,7 @@ export function parseFlightRadar24CSV(csvText: string): ParsedFlight {
 
   const callsign = rows[0]?.Callsign?.trim() || "Unknown";
   const coordinates: [number, number, number][] = [];
+  const timestamps: number[] = [];
 
   for (const row of rows) {
     const pos = row.Position?.trim();
@@ -56,13 +58,15 @@ export function parseFlightRadar24CSV(csvText: string): ParsedFlight {
 
     const altFt = parseFloat(row.Altitude) || 0;
     const altMeters = altFt * FEET_TO_METERS;
+    const ts = parseInt(row.Timestamp) || 0;
 
     coordinates.push([lon, lat, altMeters]);
+    timestamps.push(ts);
   }
 
   if (coordinates.length === 0) {
     throw new Error("No valid GPS coordinates found in CSV");
   }
 
-  return { callsign, coordinates };
+  return { callsign, coordinates, timestamps };
 }

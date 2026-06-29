@@ -23,6 +23,7 @@ export async function POST(req: NextRequest) {
       callsign: parsed.callsign,
       uploadedAt: new Date().toISOString(),
       coordinates: parsed.coordinates,
+      timestamps: parsed.timestamps,
     });
 
     return NextResponse.json(flight);
