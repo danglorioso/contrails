@@ -3,7 +3,7 @@ import "./globals.css";
 
 export const metadata: Metadata = {
   title: "Contrail",
-  description: "Your personal flight map",
+  description: "Dan's personal flight map",
 };
 
 export default function RootLayout({
