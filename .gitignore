@@ -36,6 +36,9 @@ yarn-error.log*
 # vercel
 .vercel
 
+# flight data
+/data/flights/
+
 # typescript
 *.tsbuildinfo
 next-env.d.ts
