@@ -146,7 +146,7 @@ export default function FlightMap() {
       const { startY, startPitch } = rightDragRef.current;
       const dy = startY - e.clientY; // drag up = more pitch
       const newPitch = Math.max(0, Math.min(85, startPitch + dy * 0.4));
-      setViewState((vs) => ({ ...vs, pitch: newPitch }));
+      setViewState((vs) => ({ ...vs, pitch: newPitch, transitionDuration: 0 }));
       setIs3D(newPitch > 5);
     };
 
@@ -219,7 +219,7 @@ export default function FlightMap() {
           setViewState({ ...next, pitch });
           setIs3D(pitch > 5);
         }}
-        controller={true}
+        controller={{ dragRotate: false }}
         layers={layers}
         // Clear tooltip and selection when clicking empty space
         onClick={(info) => {
