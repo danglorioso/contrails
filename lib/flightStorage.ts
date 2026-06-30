@@ -18,7 +18,7 @@ export async function getAllFlights(): Promise<FlightData[]> {
   const rows = await db()`
     SELECT id, name, callsign, uploaded_at, coordinates, timestamps
     FROM flights
-    ORDER BY uploaded_at DESC
+    ORDER BY (timestamps->0)::bigint ASC
   `;
   return rows.map((r) => ({
     id: r.id as string,

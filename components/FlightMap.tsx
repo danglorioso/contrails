@@ -210,7 +210,7 @@ export default function FlightMap() {
   const selected = flights.find((f) => f.id === selectedId);
 
   return (
-    <div className="relative w-full h-screen bg-black select-none">
+    <div className="relative w-full h-screen bg-black select-none overflow-hidden">
       <DeckGL
         viewState={viewState}
         onViewStateChange={({ viewState: vs }) => {
@@ -427,15 +427,7 @@ export default function FlightMap() {
       {/* Empty state */}
       {!loading && flights.length === 0 && (
         <div className="absolute inset-0 flex items-center justify-center z-10 pointer-events-none">
-          <div className="text-center">
-            <p className="text-gray-500 text-base mb-3">No flights yet</p>
-            <a
-              href="/admin"
-              className="pointer-events-auto text-blue-400 hover:text-blue-300 text-sm transition-colors underline underline-offset-4"
-            >
-              Upload your first flight →
-            </a>
-          </div>
+          <p className="text-gray-600 text-sm">No flights yet</p>
         </div>
       )}
     </div>
