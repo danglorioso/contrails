@@ -141,6 +141,7 @@ export default function FlightMap() {
         startPitch: viewStateRef.current.pitch ?? 50,
       };
       e.preventDefault();
+      e.stopPropagation(); // prevent deck.gl canvas from seeing right-click drag
     };
 
     const onMouseMove = (e: MouseEvent) => {
@@ -158,13 +159,14 @@ export default function FlightMap() {
 
     const onContextMenu = (e: Event) => e.preventDefault();
 
-    window.addEventListener("mousedown", onMouseDown);
+    // Capture phase so we intercept before deck.gl's canvas sees the event
+    window.addEventListener("mousedown", onMouseDown, { capture: true });
     window.addEventListener("mousemove", onMouseMove);
     window.addEventListener("mouseup", onMouseUp);
     window.addEventListener("contextmenu", onContextMenu);
 
     return () => {
-      window.removeEventListener("mousedown", onMouseDown);
+      window.removeEventListener("mousedown", onMouseDown, { capture: true });
       window.removeEventListener("mousemove", onMouseMove);
       window.removeEventListener("mouseup", onMouseUp);
       window.removeEventListener("contextmenu", onContextMenu);
@@ -221,7 +223,7 @@ export default function FlightMap() {
           setViewState({ ...next, pitch });
           setIs3D(pitch > 5);
         }}
-        controller={{ dragRotate: false }}
+        controller={true}
         layers={layers}
         pickingRadius={8}
         onHover={(info) => {
