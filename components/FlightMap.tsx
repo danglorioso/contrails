@@ -108,6 +108,8 @@ export default function FlightMap() {
   const [verticalScale, setVerticalScale] = useState(40);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [tooltip, setTooltip] = useState<{ x: number; y: number; callsign: string } | null>(null);
+  const [hoveredId, setHoveredId] = useState<string | null>(null);
+  const [hoverPos, setHoverPos] = useState<{ x: number; y: number } | null>(null);
   const [viewState, setViewState] = useState<MapViewState>(INITIAL_VIEW);
 
   const viewStateRef = useRef(viewState);
@@ -221,7 +223,17 @@ export default function FlightMap() {
         }}
         controller={{ dragRotate: false }}
         layers={layers}
-        // Clear tooltip and selection when clicking empty space
+        pickingRadius={8}
+        onHover={(info) => {
+          if (info.layer) {
+            const flightId = (info.layer.id as string).replace("flight-", "");
+            setHoveredId(flightId);
+            setHoverPos({ x: info.x, y: info.y });
+          } else {
+            setHoveredId(null);
+            setHoverPos(null);
+          }
+        }}
         onClick={(info) => {
           if (!info.object) {
             setSelectedId(null);
@@ -243,6 +255,18 @@ export default function FlightMap() {
         >
           <div className="bg-black/90 backdrop-blur-sm text-white text-xs font-mono font-semibold px-2.5 py-1.5 rounded-lg border border-white/10 shadow-lg whitespace-nowrap">
             {tooltip.callsign}
+          </div>
+        </div>
+      )}
+
+      {/* Hover tooltip — follows cursor */}
+      {hoveredId && hoverPos && hoveredId !== selectedId && (
+        <div
+          className="absolute z-30 pointer-events-none"
+          style={{ left: hoverPos.x + 12, top: hoverPos.y - 36 }}
+        >
+          <div className="bg-black/80 backdrop-blur-sm text-gray-200 text-xs font-mono px-2.5 py-1.5 rounded-lg border border-white/10 shadow-lg whitespace-nowrap">
+            {flights.find((f) => f.id === hoveredId)?.callsign}
           </div>
         </div>
       )}
