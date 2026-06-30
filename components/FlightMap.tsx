@@ -110,6 +110,8 @@ export default function FlightMap() {
   const [tooltip, setTooltip] = useState<{ x: number; y: number; callsign: string } | null>(null);
   const [hoveredId, setHoveredId] = useState<string | null>(null);
   const [hoverPos, setHoverPos] = useState<{ x: number; y: number } | null>(null);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [isTouch, setIsTouch] = useState(false);
   const [viewState, setViewState] = useState<MapViewState>(INITIAL_VIEW);
 
   const viewStateRef = useRef(viewState);
@@ -118,6 +120,10 @@ export default function FlightMap() {
   useEffect(() => {
     viewStateRef.current = viewState;
   }, [viewState]);
+
+  useEffect(() => {
+    setIsTouch(window.matchMedia("(hover: none) and (pointer: coarse)").matches);
+  }, []);
 
   useEffect(() => {
     fetch("/api/flights")
@@ -261,8 +267,8 @@ export default function FlightMap() {
         </div>
       )}
 
-      {/* Hover tooltip — follows cursor */}
-      {hoveredId && hoverPos && hoveredId !== selectedId && (
+      {/* Hover tooltip — follows cursor, desktop only */}
+      {!isTouch && hoveredId && hoverPos && hoveredId !== selectedId && (
         <div
           className="absolute z-30 pointer-events-none"
           style={{ left: hoverPos.x + 12, top: hoverPos.y - 36 }}
@@ -283,16 +289,26 @@ export default function FlightMap() {
             CONTRAILS
           </span>
           {flights.length > 0 && !loading && (
-            <span className="text-gray-500 text-xs">
+            <button
+              onClick={() => setSidebarOpen((o) => !o)}
+              className="pointer-events-auto text-xs transition-colors px-2 py-1 rounded-lg border border-transparent"
+              style={{ color: sidebarOpen ? "#9ca3af" : "#6b7280" }}
+            >
               {flights.length} flight{flights.length !== 1 ? "s" : ""}
-            </span>
+            </button>
           )}
         </div>
       </div>
 
       {/* Flight list sidebar */}
       {flights.length > 0 && (
-        <div className="absolute left-4 top-16 z-10 bg-black/75 backdrop-blur-md rounded-2xl border border-gray-800/80 p-3 w-56 max-h-[55vh] overflow-y-auto">
+        <div
+          className={`absolute left-4 top-16 z-20 bg-black/75 backdrop-blur-md rounded-2xl border border-gray-800/80 p-3 max-h-[55vh] overflow-y-auto transition-all duration-200 origin-top-left w-52 sm:w-56 ${
+            sidebarOpen
+              ? "opacity-100 scale-100 pointer-events-auto"
+              : "opacity-0 scale-95 pointer-events-none"
+          }`}
+        >
           <p className="text-gray-600 text-[10px] uppercase tracking-[0.15em] font-medium mb-2.5 px-1">
             Flights
           </p>
@@ -348,7 +364,7 @@ export default function FlightMap() {
           Math.max(...selected.coordinates.map(([, , a]) => a)) * 3.28084
         );
         return (
-          <div className="absolute left-4 bottom-24 z-10 bg-black/75 backdrop-blur-md rounded-2xl border border-gray-800/80 p-4 w-56">
+          <div className="absolute z-10 bg-black/75 backdrop-blur-md border border-gray-800/80 p-4 left-0 right-0 bottom-0 rounded-t-2xl sm:left-4 sm:right-auto sm:bottom-24 sm:w-56 sm:rounded-2xl">
             <p className="text-white text-sm font-semibold mb-3 truncate">
               {selected.name}
             </p>
@@ -379,7 +395,7 @@ export default function FlightMap() {
       })()}
 
       {/* Controls — bottom right */}
-      <div className="absolute right-4 bottom-6 z-10 flex flex-col items-end gap-2">
+      <div className="absolute right-4 z-10 flex flex-col items-end gap-2" style={{ bottom: "max(1.5rem, env(safe-area-inset-bottom, 1.5rem))" }}>
         <div className="flex flex-col items-end gap-2">
           <div className="flex items-center gap-2">
             {/* Compass — rotates with bearing, click resets to north */}

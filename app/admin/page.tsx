@@ -108,7 +108,7 @@ export default function AdminPage() {
   return (
     <div className="min-h-screen bg-black text-white" style={{ overflow: "auto" }}>
       {/* Header */}
-      <div className="border-b border-gray-900 px-6 py-4 flex items-center justify-between sticky top-0 bg-black z-10">
+      <div className="border-b border-gray-900 px-4 sm:px-6 py-4 flex items-center justify-between sticky top-0 bg-black z-10">
         <div className="flex items-center gap-5">
           <a
             href="/"
@@ -129,7 +129,7 @@ export default function AdminPage() {
         </button>
       </div>
 
-      <div className="max-w-2xl mx-auto px-6 py-10">
+      <div className="max-w-2xl mx-auto px-4 sm:px-6 py-8 sm:py-10">
         {/* Upload form */}
         <section className="mb-12">
           <h2 className="text-white font-semibold text-lg mb-1">Upload Flight</h2>
@@ -143,31 +143,33 @@ export default function AdminPage() {
             className="bg-gray-950 rounded-2xl border border-gray-900 p-6 space-y-4"
           >
             {/* Airport row */}
-            <div className="flex items-center gap-3">
-              <div className="flex-1">
-                <label className="block text-gray-400 text-sm mb-1.5">From</label>
-                <input
-                  type="text"
-                  value={fromAirport}
-                  onChange={(e) => setFromAirport(e.target.value)}
-                  placeholder="BOS"
-                  maxLength={4}
-                  className="w-full bg-black border border-gray-800 rounded-xl px-4 py-3 text-white placeholder-gray-700 uppercase focus:outline-none focus:border-blue-500 transition-colors font-mono text-sm tracking-widest"
-                />
+            <div className="flex flex-col sm:flex-row sm:items-center gap-3">
+              <div className="flex items-center gap-3 sm:contents">
+                <div className="flex-1">
+                  <label className="block text-gray-400 text-sm mb-1.5">From</label>
+                  <input
+                    type="text"
+                    value={fromAirport}
+                    onChange={(e) => setFromAirport(e.target.value)}
+                    placeholder="BOS"
+                    maxLength={4}
+                    className="w-full bg-black border border-gray-800 rounded-xl px-4 py-3 text-white placeholder-gray-700 uppercase focus:outline-none focus:border-blue-500 transition-colors font-mono text-sm tracking-widest"
+                  />
+                </div>
+                <span className="text-gray-600 mt-6 flex-shrink-0">→</span>
+                <div className="flex-1">
+                  <label className="block text-gray-400 text-sm mb-1.5">To</label>
+                  <input
+                    type="text"
+                    value={toAirport}
+                    onChange={(e) => setToAirport(e.target.value)}
+                    placeholder="LAX"
+                    maxLength={4}
+                    className="w-full bg-black border border-gray-800 rounded-xl px-4 py-3 text-white placeholder-gray-700 uppercase focus:outline-none focus:border-blue-500 transition-colors font-mono text-sm tracking-widest"
+                  />
+                </div>
               </div>
-              <span className="text-gray-600 mt-6">→</span>
-              <div className="flex-1">
-                <label className="block text-gray-400 text-sm mb-1.5">To</label>
-                <input
-                  type="text"
-                  value={toAirport}
-                  onChange={(e) => setToAirport(e.target.value)}
-                  placeholder="LAX"
-                  maxLength={4}
-                  className="w-full bg-black border border-gray-800 rounded-xl px-4 py-3 text-white placeholder-gray-700 uppercase focus:outline-none focus:border-blue-500 transition-colors font-mono text-sm tracking-widest"
-                />
-              </div>
-              <div className="flex-1">
+              <div className="sm:flex-1">
                 <label className="block text-gray-400 text-sm mb-1.5">Date</label>
                 <input
                   type="date"
