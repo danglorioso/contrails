@@ -262,12 +262,6 @@ export default function FlightMap() {
             </span>
           )}
         </div>
-        <a
-          href="/admin"
-          className="pointer-events-auto text-gray-500 hover:text-gray-200 text-sm transition-colors px-3 py-1.5 rounded-lg border border-gray-800 hover:border-gray-600 bg-black/60 backdrop-blur-sm"
-        >
-          Admin
-        </a>
       </div>
 
       {/* Flight list sidebar */}
