@@ -220,7 +220,7 @@ export default function FlightMap() {
   const selected = flights.find((f) => f.id === selectedId);
 
   return (
-    <div className="relative w-full h-screen bg-black select-none overflow-hidden">
+    <div className="relative w-full bg-black select-none overflow-hidden" style={{ height: "100dvh" }}>
       <DeckGL
         viewState={viewState}
         onViewStateChange={({ viewState: vs }) => {
@@ -280,24 +280,98 @@ export default function FlightMap() {
       )}
 
       {/* Top bar */}
-      <div className="absolute top-0 left-0 right-0 flex items-center justify-between px-5 py-4 z-10 pointer-events-none">
-        <div className="flex items-center gap-3">
-          <span
-            className="text-white font-bold tracking-[0.35em] text-lg"
-            style={{ textShadow: "0 0 20px rgba(64,196,255,0.5)" }}
-          >
-            CONTRAILS
-          </span>
-          {flights.length > 0 && !loading && (
-            <button
-              onClick={() => setSidebarOpen((o) => !o)}
-              className="pointer-events-auto text-xs transition-colors px-2 py-1 rounded-lg border border-transparent"
-              style={{ color: sidebarOpen ? "#9ca3af" : "#6b7280" }}
+      <div className="absolute top-0 left-0 right-0 z-10 pointer-events-none">
+        {/* Title row */}
+        <div className="flex items-center justify-between px-4 sm:px-5 py-4">
+          <div className="flex items-center gap-3">
+            <span
+              className="text-white font-bold tracking-[0.35em] text-lg"
+              style={{ textShadow: "0 0 20px rgba(64,196,255,0.5)" }}
             >
-              {flights.length} flight{flights.length !== 1 ? "s" : ""}
+              CONTRAILS
+            </span>
+            {/* Desktop sidebar toggle */}
+            {flights.length > 0 && !loading && (
+              <button
+                onClick={() => setSidebarOpen((o) => !o)}
+                className="pointer-events-auto hidden sm:inline-flex text-xs transition-colors px-2 py-1 rounded-lg"
+                style={{ color: sidebarOpen ? "#9ca3af" : "#6b7280" }}
+              >
+                {flights.length} flight{flights.length !== 1 ? "s" : ""}
+              </button>
+            )}
+          </div>
+          {/* Mobile: compass + 2D/3D in top bar */}
+          <div className="flex sm:hidden items-center gap-2 pointer-events-auto">
+            <button
+              onClick={() => setViewState((vs) => ({ ...vs, bearing: 0 }))}
+              title="Reset to north"
+              className="w-9 h-9 flex items-center justify-center bg-black/70 backdrop-blur-md rounded-full border border-gray-800/80"
+            >
+              <svg viewBox="0 0 32 32" width="18" height="18" overflow="visible">
+                <g
+                  style={{
+                    transform: `rotate(${-(viewState.bearing ?? 0)}deg)`,
+                    transformOrigin: "16px 16px",
+                  }}
+                >
+                  <polygon points="16,3 19.5,16 16,13.5 12.5,16" fill="#ef4444" />
+                  <polygon points="16,29 19.5,16 16,18.5 12.5,16" fill="#374151" />
+                </g>
+              </svg>
             </button>
-          )}
+            <button
+              onClick={toggle3D}
+              className={`px-4 py-2 rounded-xl border text-xs font-semibold tracking-wide transition-all backdrop-blur-sm ${
+                is3D
+                  ? "bg-blue-500/15 border-blue-500/40 text-blue-300"
+                  : "bg-black/70 border-gray-700 text-gray-400"
+              }`}
+            >
+              {is3D ? "3D" : "2D"}
+            </button>
+          </div>
         </div>
+
+        {/* Mobile horizontal flight chip strip */}
+        {flights.length > 0 && !loading && (
+          <div className="sm:hidden pb-3 px-1 pointer-events-auto">
+            <div
+              className="flex gap-2 px-3 overflow-x-auto"
+              style={{ scrollbarWidth: "none" }}
+            >
+              {flights.map((flight, index) => {
+                const color = FLIGHT_COLORS[index % FLIGHT_COLORS.length];
+                const isSelected = selectedId === flight.id;
+                return (
+                  <button
+                    key={flight.id}
+                    onClick={() => {
+                      setSelectedId(isSelected ? null : flight.id);
+                      setTooltip(null);
+                    }}
+                    className={`flex-shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-full border text-xs font-medium whitespace-nowrap transition-all backdrop-blur-md ${
+                      isSelected
+                        ? "bg-white/15 border-white/20 text-white"
+                        : "bg-black/70 border-gray-800/80 text-gray-400"
+                    }`}
+                  >
+                    <span
+                      className="w-1.5 h-1.5 rounded-full flex-shrink-0"
+                      style={{
+                        backgroundColor: `rgb(${color.join(",")})`,
+                        boxShadow: isSelected
+                          ? `0 0 4px rgb(${color.join(",")})`
+                          : "none",
+                      }}
+                    />
+                    {flight.name}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Flight list sidebar */}
@@ -364,10 +438,21 @@ export default function FlightMap() {
           Math.max(...selected.coordinates.map(([, , a]) => a)) * 3.28084
         );
         return (
-          <div className="absolute z-10 bg-black/75 backdrop-blur-md border border-gray-800/80 p-4 left-0 right-0 bottom-0 rounded-t-2xl sm:left-4 sm:right-auto sm:bottom-24 sm:w-56 sm:rounded-2xl">
-            <p className="text-white text-sm font-semibold mb-3 truncate">
-              {selected.name}
-            </p>
+          <div
+            className="absolute z-10 bg-black/80 backdrop-blur-md border border-gray-800/80 p-4 left-0 right-0 bottom-0 rounded-t-2xl sm:left-4 sm:right-auto sm:bottom-24 sm:w-56 sm:rounded-2xl"
+            style={{ paddingBottom: "max(env(safe-area-inset-bottom, 0px), 1rem)" }}
+          >
+            <div className="flex items-start justify-between mb-3 sm:block">
+              <p className="text-white text-sm font-semibold truncate">
+                {selected.name}
+              </p>
+              <button
+                className="sm:hidden ml-3 flex-shrink-0 text-gray-500 active:text-white text-base leading-none"
+                onClick={() => { setSelectedId(null); setTooltip(null); }}
+              >
+                ✕
+              </button>
+            </div>
             <div className="space-y-1.5">
               <div className="flex justify-between items-baseline">
                 <span className="text-gray-600 text-[10px] uppercase tracking-wider">Distance</span>
@@ -394,8 +479,8 @@ export default function FlightMap() {
         );
       })()}
 
-      {/* Controls — bottom right */}
-      <div className="absolute right-4 z-10 flex flex-col items-end gap-2" style={{ bottom: "max(1.5rem, env(safe-area-inset-bottom, 1.5rem))" }}>
+      {/* Controls — bottom right (desktop only) */}
+      <div className="hidden sm:flex absolute right-4 z-10 flex-col items-end gap-2" style={{ bottom: "max(1.5rem, env(safe-area-inset-bottom, 1.5rem))" }}>
         <div className="flex flex-col items-end gap-2">
           <div className="flex items-center gap-2">
             {/* Compass — rotates with bearing, click resets to north */}
