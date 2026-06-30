@@ -12,16 +12,15 @@
     "@deck.gl/core": "^9.3.5",
     "@deck.gl/layers": "^9.3.5",
     "@deck.gl/react": "^9.3.5",
+    "@neondatabase/serverless": "^1.1.0",
     "@types/papaparse": "^5.5.2",
-    "@types/uuid": "^10.0.0",
     "maplibre-gl": "^5.24.0",
     "next": "16.2.9",
     "next-auth": "^4.24.14",
     "papaparse": "^5.5.4",
     "react": "19.2.4",
     "react-dom": "19.2.4",
-    "react-map-gl": "^8.1.1",
-    "uuid": "^14.0.1"
+    "react-map-gl": "^8.1.1"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
